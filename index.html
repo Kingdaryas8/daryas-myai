@@ -3,88 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ژیار - زیرەکی دەستکرد</title>
+    <title>Daryas AI</title>
     <style>
-        :root { --primary: #0084ff; --bg: #f0f2f5; --bot-msg: #ffffff; --user-msg: #0084ff; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        
+        :root {
+            --bg: #0b0e14;
+            --header-bg: #161b22;
+            --primary: #00a2ff;
+            --user-msg: #00a2ff;
+            --bot-msg: #21262d;
+            --text: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
         /* سەرپەڕە */
-        header { background: var(--primary); color: white; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header {
+            background-color: var(--header-bg);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border-bottom: 1px solid #30363d;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
 
-        /* شوێنی چاتەکە */
-        #chat-window { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        
-        .message { padding: 12px 18px; border-radius: 20px; max-width: 75%; font-size: 15px; line-height: 1.6; position: relative; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            color: var(--primary);
+        }
 
-        .user { background-color: var(--user-msg); color: white; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 2px 5px rgba(0,132,255,0.2); }
-        .bot { background-color: var(--bot-msg); color: #333; align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd; }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #23d160;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #23d160;
+        }
+
+        /* چاتەکە */
+        #chat-window {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scroll-behavior: smooth;
+        }
+
+        /* ستاڵی نامەکان */
+        .msg {
+            padding: 14px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            font-size: 15px;
+            line-height: 1.5;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user {
+            background: var(--user-msg);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+            box-shadow: 0 4px 10px rgba(0, 162, 255, 0.3);
+        }
+
+        .bot {
+            background: var(--bot-msg);
+            color: #e6edf3;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            border: 1px solid #30363d;
+        }
 
         /* بەشی ناردن */
-        .input-area { background: white; padding: 15px; display: flex; align-items: center; gap: 10px; border-top: 1px solid #ddd; }
-        input { flex: 1; padding: 12px 20px; border: 1px solid #eee; border-radius: 30px; outline: none; background: #f9f9f9; font-size: 15px; transition: 0.3s; }
-        input:focus { border-color: var(--primary); background: #fff; }
-        button { background: var(--primary); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-        button:hover { transform: scale(1.05); background: #0073e6; }
+        .input-area {
+            background-color: var(--header-bg);
+            padding: 20px;
+            display: flex;
+            gap: 12px;
+            border-top: 1px solid #30363d;
+        }
+
+        input {
+            flex: 1;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 12px 15px;
+            color: white;
+            outline: none;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 5px rgba(0, 162, 255, 0.4);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            filter: brightness(1.2);
+            transform: scale(1.02);
+        }
 
         /* نیشانەی چاوەڕێکردن */
-        .loading { font-size: 12px; color: #888; margin-top: 5px; display: none; }
+        .typing {
+            font-size: 12px;
+            color: #8b949e;
+            margin-left: 20px;
+            display: none;
+        }
+
+        /* جوانکاری بۆ شریتەکە */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<header>چاتبۆتی کوردی (Gemini)</header>
+<div class="header">
+    <div class="status-dot"></div>
+    <h1>Daryas AI</h1>
+</div>
 
 <div id="chat-window">
-    <div class="message bot">سڵاو! چۆن دەتوانم یارمەتیت بدەم؟</div>
+    <div class="msg bot">سڵاو دەریاس گیان! چۆن دەتوانم ئەمڕۆ یارمەتیت بدەم؟ 🚀</div>
 </div>
 
-<div id="loading-text" class="loading" style="padding-right: 20px;">وەڵام دەداتەوە...</div>
+<div id="typing" class="typing" style="padding: 0 20px 10px 0;">Daryas AI بیردەکاتەوە...</div>
 
 <div class="input-area">
-    <input type="text" id="userInput" placeholder="چی بکەم بۆت؟..." onkeypress="handleKey(event)">
-    <button onclick="askAI()">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-    </button>
+    <input type="text" id="userInput" placeholder="لێرە بنووسە..." onkeypress="if(event.key==='Enter') askAI()">
+    <button onclick="askAI()">ناردن</button>
 </div>
 
-<script type="module">
-    import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
-
-    const API_KEY = "AIzaSyC04_c5G_xlZyhx5V0Dy2o7wuv7w8KrXFE";
-    const genAI = new GoogleGenerativeAI(API_KEY);
-
-    window.handleKey = function(e) { if(e.key === 'Enter') askAI(); }
-
-    window.askAI = async function() {
+<script>
+    async function askAI() {
         const input = document.getElementById('userInput');
-        const windowChat = document.getElementById('chat-window');
-        const loader = document.getElementById('loading-text');
+        const chatWindow = document.getElementById('chat-window');
+        const typingIndicator = document.getElementById('typing');
         const text = input.value.trim();
-        
+
         if (!text) return;
 
-        // پیشاندانی نامەی بەکارهێنەر
-        windowChat.innerHTML += `<div class="message user">${text}</div>`;
+        // نامەی تۆ
+        chatWindow.innerHTML += `<div class="msg user">${text}</div>`;
         input.value = '';
-        loader.style.display = 'block';
-        windowChat.scrollTop = windowChat.scrollHeight;
+        typingIndicator.style.display = 'block';
+        chatWindow.scrollTop = chatWindow.scrollHeight;
 
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const result = await model.generateContent(text);
-            const response = await result.response;
-            const aiReply = response.text();
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyC04_c5G_xlZyhx5V0Dy2o7wuv7w8KrXFE`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: text }] }]
+                })
+            });
 
-            // پیشاندانی وەڵامی AI
-            windowChat.innerHTML += `<div class="message bot">${aiReply}</div>`;
+            const data = await response.json();
+            typingIndicator.style.display = 'none';
+
+            if (data.candidates && data.candidates[0].content.parts[0].text) {
+                const aiReply = data.candidates[0].content.parts[0].text;
+                chatWindow.innerHTML += `<div class="msg bot">${aiReply}</div>`;
+            } else {
+                throw new Error();
+            }
         } catch (error) {
-            console.error(error);
-            windowChat.innerHTML += `<div class="message bot" style="color: red;">ببورە، کێشەیەک هەیە. دڵنیابە کلیلەکەت کار دەکات.</div>`;
+            typingIndicator.style.display = 'none';
+            chatWindow.innerHTML += `<div class="msg bot" style="color:#ff7b72">ببورە، هەڵەیەک ڕوویدا. دووبارە تاقیبکەرەوە.</div>`;
         }
-        
-        loader.style.display = 'none';
-        windowChat.scrollTop = windowChat.scrollHeight;
+        chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 </script>
 
