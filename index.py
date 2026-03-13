@@ -6,19 +6,21 @@ import google.generativeai as genai
 app = Flask(__name__)
 CORS(app)
 
-# کلیلەکەی تۆ لێرە جێگیر کرا
-genai.configure(api_key="AIzaSyC04_c5G_xlZyhx5V0Dy2o7wuv7w8KrXFE")
+# کلیلەکەی تۆ لێرە بە ڕاستی جێگیر کراوە
+API_KEY = "AIzaSyC04_c5G_xlZyhx5V0Dy2o7wuv7w8KrXFE"
+genai.configure(api_key=API_KEY)
 
+# ڕێکخستنی مۆدێلی Gemini
 generation_config = {
-  "temperature": 0.9,
-  "top_p": 1,
-  "top_k": 1,
-  "max_output_tokens": 2048,
+    "temperature": 0.7,
+    "top_p": 1,
+    "top_k": 1,
+    "max_output_tokens": 2048,
 }
 
 model = genai.GenerativeModel(
-  model_name="gemini-pro",
-  generation_config=generation_config
+    model_name="gemini-1.5-flash", # یان gemini-pro
+    generation_config=generation_config
 )
 
 @app.route('/')
@@ -32,15 +34,20 @@ def chat():
         user_message = data.get('message')
         
         if not user_message:
-            return jsonify({"error": "No message provided"}), 400
+            return jsonify({"error": "نامەکە بەتاڵە"}), 400
 
-        response = model.generate_content(user_message)
+        # ناردنی نامە بۆ زیرەکی دەستکرد
+        chat_session = model.start_chat(history=[])
+        response = chat_session.send_message(user_message)
+        
         return jsonify({"reply": response.text})
     
     except Exception as e:
+        # ئەگەر هەڵەیەک ڕوویدا لێرە دەردەکەوێت
+        print(f"Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-# زۆر گرنگە بۆ کارکردنی لەسەر Vercel
+# ئەم دوو دێڕە بۆ Vercel وەک ئۆکسجین وایە، دەبێت هەبێت
 app = app
 
 if __name__ == "__main__":
