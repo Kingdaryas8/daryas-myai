@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ژیری دەستکردی تایبەت</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <header>
+            <h1>سیستەمی <span class="my-name">ناوی تۆ لێرە</span></h1>
+            <p>ژیری دەستکردی بێ سانسۆر و مۆدێرن</p>
+        </header>
+
+        <div class="chat-window" id="chatWindow">
+            <div class="message bot-msg">سڵاو! من یاریدەدەرە تایبەتەکەی تۆم. چۆن یارمەتیت بدەم؟</div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="لێرە شتێک بنووسە...">
+            <button onclick="sendMessage()">ناردن</button>
+        </div>
+    </div>
+
+</body>
+</html>
