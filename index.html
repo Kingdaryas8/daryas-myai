@@ -3,25 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chatbot Kurdish</title>
+    <title>ژیار - زیرەکی دەستکرد</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        #chat-window { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
-        .message { margin: 10px 0; padding: 12px 16px; border-radius: 15px; max-width: 70%; line-height: 1.5; }
-        .user { background-color: #0084ff; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .bot { background-color: #e4e6eb; color: black; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .input-area { background: white; padding: 20px; display: flex; box-shadow: 0 -2px 5px rgba(0,0,0,0.05); }
-        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; font-size: 16px; }
-        button { background-color: #0084ff; color: white; border: none; padding: 0 25px; margin-right: 10px; border-radius: 25px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #0073e6; }
+        :root { --primary: #0084ff; --bg: #f0f2f5; --bot-msg: #ffffff; --user-msg: #0084ff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* سەرپەڕە */
+        header { background: var(--primary); color: white; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        /* شوێنی چاتەکە */
+        #chat-window { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .message { padding: 12px 18px; border-radius: 20px; max-width: 75%; font-size: 15px; line-height: 1.6; position: relative; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .user { background-color: var(--user-msg); color: white; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 2px 5px rgba(0,132,255,0.2); }
+        .bot { background-color: var(--bot-msg); color: #333; align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd; }
+
+        /* بەشی ناردن */
+        .input-area { background: white; padding: 15px; display: flex; align-items: center; gap: 10px; border-top: 1px solid #ddd; }
+        input { flex: 1; padding: 12px 20px; border: 1px solid #eee; border-radius: 30px; outline: none; background: #f9f9f9; font-size: 15px; transition: 0.3s; }
+        input:focus { border-color: var(--primary); background: #fff; }
+        button { background: var(--primary); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        button:hover { transform: scale(1.05); background: #0073e6; }
+
+        /* نیشانەی چاوەڕێکردن */
+        .loading { font-size: 12px; color: #888; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
 
-<div id="chat-window"></div>
+<header>چاتبۆتی کوردی (Gemini)</header>
+
+<div id="chat-window">
+    <div class="message bot">سڵاو! چۆن دەتوانم یارمەتیت بدەم؟</div>
+</div>
+
+<div id="loading-text" class="loading" style="padding-right: 20px;">وەڵام دەداتەوە...</div>
+
 <div class="input-area">
-    <input type="text" id="userInput" placeholder="چی بکەم بۆت؟...">
-    <button onclick="askAI()">ناردن</button>
+    <input type="text" id="userInput" placeholder="چی بکەم بۆت؟..." onkeypress="handleKey(event)">
+    <button onclick="askAI()">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+    </button>
 </div>
 
 <script type="module">
@@ -30,17 +54,21 @@
     const API_KEY = "AIzaSyC04_c5G_xlZyhx5V0Dy2o7wuv7w8KrXFE";
     const genAI = new GoogleGenerativeAI(API_KEY);
 
+    window.handleKey = function(e) { if(e.key === 'Enter') askAI(); }
+
     window.askAI = async function() {
         const input = document.getElementById('userInput');
-        const window = document.getElementById('chat-window');
+        const windowChat = document.getElementById('chat-window');
+        const loader = document.getElementById('loading-text');
         const text = input.value.trim();
         
         if (!text) return;
 
-        // نامەی تۆ
-        window.innerHTML += `<div class="message user">${text}</div>`;
+        // پیشاندانی نامەی بەکارهێنەر
+        windowChat.innerHTML += `<div class="message user">${text}</div>`;
         input.value = '';
-        window.scrollTop = window.scrollHeight;
+        loader.style.display = 'block';
+        windowChat.scrollTop = windowChat.scrollHeight;
 
         try {
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -48,12 +76,15 @@
             const response = await result.response;
             const aiReply = response.text();
 
-            // وەڵامی AI
-            window.innerHTML += `<div class="message bot">${aiReply}</div>`;
+            // پیشاندانی وەڵامی AI
+            windowChat.innerHTML += `<div class="message bot">${aiReply}</div>`;
         } catch (error) {
-            window.innerHTML += `<div class="message bot" style="color: red;">ببورە، کێشەیەک هەیە: ${error.message}</div>`;
+            console.error(error);
+            windowChat.innerHTML += `<div class="message bot" style="color: red;">ببورە، کێشەیەک هەیە. دڵنیابە کلیلەکەت کار دەکات.</div>`;
         }
-        window.scrollTop = window.scrollHeight;
+        
+        loader.style.display = 'none';
+        windowChat.scrollTop = windowChat.scrollHeight;
     }
 </script>
 
