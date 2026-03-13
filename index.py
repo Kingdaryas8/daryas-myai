@@ -1,39 +1,47 @@
-import google.generativeai as genai
+import os
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
+import google.generativeai as genai
 
 app = Flask(__name__)
+CORS(app)
 
-# بەستنەوەی کلیلەکەت بە مێشکی Gemini
+# کلیلەکەی تۆ لێرە جێگیر کرا
 genai.configure(api_key="AIzaSyC04_c5G_xlZyhx5V0Dy2o7wuv7w8KrXFE")
 
-# هەڵبژاردنی مۆدێلی ژیری دەستکرد
-model = genai.GenerativeModel('gemini-1.5-flash')
+generation_config = {
+  "temperature": 0.9,
+  "top_p": 1,
+  "top_k": 1,
+  "max_output_tokens": 2048,
+}
+
+model = genai.GenerativeModel(
+  model_name="gemini-pro",
+  generation_config=generation_config
+)
 
 @app.route('/')
-def home():
-    # ناردنی بەکارهێنەر بۆ لاپەڕە سەرەکییەکە
+def index():
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
-        # وەرگرتنی نامەکە لە وێبسایتەکەوە
         data = request.json
         user_message = data.get('message')
-
+        
         if not user_message:
-            return jsonify({"reply": "تکایە شتێک بنووسە..."})
+            return jsonify({"error": "No message provided"}), 400
 
-        # ناردنی نامەکە بۆ Gemini و وەرگرتنی وەڵام
         response = model.generate_content(user_message)
-        bot_reply = response.text
-
-        return jsonify({"reply": bot_reply})
-
+        return jsonify({"reply": response.text})
+    
     except Exception as e:
-        print(f"Error: {e}")
-        return jsonify({"reply": "ببوورە، کێشەیەک لە پەیوەندی بە سێرڤەر هەبوو. دڵنیابە ئینتەرنێتەکەت یان VPNـەکەت کار دەکات."})
+        return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    # دەستپێکردنی بەرنامەکە
+# زۆر گرنگە بۆ کارکردنی لەسەر Vercel
+app = app
+
+if __name__ == "__main__":
     app.run(debug=True)
